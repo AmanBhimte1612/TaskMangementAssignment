@@ -1,45 +1,78 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { View } from 'react-native';
+import { Feather, MaterialIcons, Ionicons, AntDesign, FontAwesome5 } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+export default function Layout() {
+    return (
+        <Tabs
+            screenOptions={{
+                headerShown: false,
+                tabBarShowLabel: false,
+                tabBarStyle: {
+                    height: 80,
+                    backgroundColor: 'white',
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
+                    position: 'absolute',
+                    elevation: 5,
+                },
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+            }}
+        >
+            <Tabs.Screen
+                name="Tasks"
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <FontAwesome5 name="list-ul" size={35} color={focused ? '#7c3aed' : '#9ca3af'} />
+                    ),
+                    tabBarIconStyle: {
+                        height: 50,
+                        width: 50
+                    }
+                }}
+            />
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+            
+            <Tabs.Screen
+                name="Create"
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <View
+                            style={{
+                                backgroundColor: focused ? 'white' : '#7c3aed',
+                                width: 60,
+                                borderColor:  '#7c3aed',
+                                borderWidth: 5,
+                                height: 60,
+                                borderRadius: 30,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                marginTop: -20,
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.25,
+                                shadowRadius: 3.84,
+                                elevation: 5,
+                            }}
+                        >
+                            <AntDesign name="plus" size={30} color={focused ? '#7c3aed' : 'white'} />
+                        </View>
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+                name="Dates"
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <Feather name="calendar" size={35} color={focused ? '#7c3aed' : '#9ca3af'} />
+                    ),
+                    tabBarIconStyle: {
+                        height: 50,
+                        width: 50
+                    }
+                }}
+            />
+        </Tabs>
+    );
 }
