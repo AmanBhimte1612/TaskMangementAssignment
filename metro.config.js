@@ -1,10 +1,16 @@
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require('nativewind/metro');
+const { withNativeWind } = require("nativewind/metro");
 
-const config = getDefaultConfig(__dirname);
+// Get Expo's default Metro config
+let config = getDefaultConfig(__dirname);
 
-// ✅ Fix for Firebase Auth issue
+// Add Firebase Auth fix
 config.resolver.unstable_enablePackageExports = false;
 
-// ✅ Include NativeWind integration
-module.exports = withNativeWind(config, { input: './global.css' });
+// Wrap with NativeWind config
+config = withNativeWind(config, {
+  input: "./global.css",
+});
+
+// Export final config
+module.exports = config;

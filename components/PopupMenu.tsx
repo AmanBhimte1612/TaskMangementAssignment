@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     View,
     Text,
@@ -7,7 +7,11 @@ import {
     StyleSheet,
     Pressable,
 } from 'react-native';
-import { Feather, MaterialIcons, Entypo } from '@expo/vector-icons';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+} from 'react-native-reanimated';
 
 type MenuItem = {
     label: string;
@@ -22,15 +26,40 @@ type Props = {
 };
 
 const PopupMenu = ({ visible, onClose, items }: Props) => {
+    const scale = useSharedValue(0);
+    const translateX = useSharedValue(50);
+    const translateY = useSharedValue(-50);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [
+            { scale: scale.value },
+            { translateX: translateX.value },
+            { translateY: translateY.value },
+        ],
+        opacity: scale.value,
+    }));
+
+    useEffect(() => {
+        if (visible) {
+            scale.value = withTiming(1, { duration: 250 });
+            translateX.value = withTiming(0, { duration: 250 });
+            translateY.value = withTiming(0, { duration: 250 });
+        } else {
+            scale.value = withTiming(0, { duration: 200 });
+            translateX.value = withTiming(50, { duration: 200 });
+            translateY.value = withTiming(-50, { duration: 200 });
+        }
+    }, [visible]);
+
     return (
         <Modal
             transparent
-            animationType="fade"
+            animationType="none"
             visible={visible}
             onRequestClose={onClose}
         >
             <Pressable style={styles.overlay} onPress={onClose}>
-                <View style={styles.menuContainer}>
+                <Animated.View style={[styles.menuContainer, animatedStyle]}>
                     {items.map((item, index) => (
                         <TouchableOpacity
                             key={index}
@@ -44,7 +73,7 @@ const PopupMenu = ({ visible, onClose, items }: Props) => {
                             <Text style={styles.label}>{item.label}</Text>
                         </TouchableOpacity>
                     ))}
-                </View>
+                </Animated.View>
             </Pressable>
         </Modal>
     );
@@ -58,7 +87,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
-        
         paddingTop: 80,
         paddingRight: 10,
     },

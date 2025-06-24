@@ -82,3 +82,32 @@ export const deleteTaskFromFirestore = async (
     throw error;
   }
 };
+
+
+/**
+ * Updates fields in a user's task document.
+ *
+ * @param userId - The UID of the user.
+ * @param taskId - The ID of the task document.
+ * @param updatedFields - An object containing the fields to update.
+ */
+export const updateTaskInFirestore = async (
+  userId: string,
+  taskId: string,
+  updatedFields: Partial<{
+    title: string;
+    description: string;
+    dueDate: string;
+    priority: string;
+    status: string;
+  }>
+): Promise<void> => {
+  try {
+    const taskRef = doc(db, 'Users', userId, 'Tasks', taskId);
+    await updateDoc(taskRef, updatedFields);
+    console.log(`Task ${taskId} updated successfully.`);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error;
+  }
+};

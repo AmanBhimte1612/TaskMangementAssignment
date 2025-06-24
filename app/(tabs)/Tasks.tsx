@@ -15,13 +15,17 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Checkbox from 'expo-checkbox';
 import Header from '@/components/Header';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getSubcollectionData } from '@/sevices';
+import { getSubcollectionData, deleteTaskFromFirestore } from '@/sevices';
 import { parse, compareAsc, isToday, set, } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
 import SideMenu from '@/components/SideMenu';
 import PopupMenu from '@/components/PopupMenu';
 import { useAuth } from '@/context/AuthContext';
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
+import { getAuth } from 'firebase/auth';
+import { app } from '@/FirebaseConfig'; // your initialized firebase app
+
+
 
 
 type Task = {
@@ -142,6 +146,9 @@ const TaskItem = ({ item, onDelete, onComplete, onExpand, isExpanded }: any) => 
 };
 
 const Tasks = () => {
+    const auth = getAuth(app);
+    const userId = auth.currentUser?.uid;
+    console.log('Current User ID:', userId);
     const [expandedTask, setExpandedTask] = useState<string | null>(null);
     const [taskList, setTaskList] = useState<any[]>([]);
     const [menuVisible, setMenuVisible] = useState(false);
@@ -152,7 +159,7 @@ const Tasks = () => {
             const fetchAndSetTasks = async () => {
                 const tasksData = await getSubcollectionData(
                     'Users',
-                    'TCPyJuNEeION5rMLmsUIO2MA6dz1',
+                    userId,
                     'Tasks'
                 );
                 const todaysTasks = getTodaysTasks(tasksData);
@@ -169,6 +176,7 @@ const Tasks = () => {
         const updated = taskList.map((task) =>
             task.id === id ? { ...task, status: 'Completed' } : task
         );
+        
         setTaskList(sortTasks(updated));
     };
 
@@ -178,6 +186,7 @@ const Tasks = () => {
 
     const handleDelete = (id: string) => {
         const updated = taskList.filter((task) => task.id !== id);
+        deleteTaskFromFirestore(userId, id);
         setTaskList(sortTasks(updated));
     };
 
@@ -211,7 +220,7 @@ const Tasks = () => {
                 onClose={() => setMenuVisible(false)}
                 items={menuItems}
             />
-            
+
             <FlatList
                 data={taskList}
                 keyExtractor={(item) => item.id}
@@ -224,7 +233,7 @@ const Tasks = () => {
                         isExpanded={item.id === expandedTask}
                     />
                 )}
-                contentContainerStyle={{ paddingBottom: 20, paddingTop: 10,marginTop:30 }}
+                contentContainerStyle={{ paddingBottom: 20, paddingTop: 10, marginTop: 30 }}
             />
         </SafeAreaView>
     );

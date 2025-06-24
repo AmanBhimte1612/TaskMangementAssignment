@@ -14,8 +14,13 @@ import TimePicker from '@/components/Timepicker';
 import CustomButton from '@/components/CustomButton';
 import { handleSaveTask } from '@/sevices';
 import { router } from 'expo-router';
+import { app } from '@/FirebaseConfig'; // your initialized firebase app
+import { getAuth } from 'firebase/auth';
 
 const Create = () => {
+  const auth = getAuth(app);
+      const userId = auth.currentUser?.uid;
+      console.log('Current User ID:', userId);
   const { width, height } = useWindowDimensions();
 
   const [taskTitle, setTaskTitle] = useState('');
@@ -45,7 +50,7 @@ const Create = () => {
   }, [taskTitle, taskDes, dueDate, time, priority]);
 
   const handleSubmit = async () => {
-    const res = await handleSaveTask('TCPyJuNEeION5rMLmsUIO2MA6dz1', form);
+    const res = await handleSaveTask(userId, form);
     if (res === true) {
       alert('Task Created Successfully');
       router.push('/(tabs)/Tasks');

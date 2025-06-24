@@ -12,6 +12,8 @@ import { getSubcollectionData } from '@/sevices';
 import Checkbox from 'expo-checkbox';
 import { isToday, isTomorrow, parse, differenceInCalendarDays, format } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
+import { app } from '@/FirebaseConfig'; // your initialized firebase app
+import { getAuth } from 'firebase/auth';
 
 
 const TaskCard = ({ task }: any) => {
@@ -76,6 +78,9 @@ const groupTasksByDate = (tasks: any[]) => {
 
 
 const Tasks = () => {
+  const auth = getAuth(app);
+  const userId = auth.currentUser?.uid;
+  console.log('Current User ID:', userId);
   const [taskList, setTaskList] = useState<any[]>([]);
 
   useFocusEffect(
@@ -83,7 +88,7 @@ const Tasks = () => {
       const fetchAndSetTasks = async () => {
         const tasksData = await getSubcollectionData(
           'Users',
-          'TCPyJuNEeION5rMLmsUIO2MA6dz1',
+          userId,
           'Tasks'
         );
         setTaskList(tasksData);
@@ -97,7 +102,7 @@ const Tasks = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <Header headerTitle="By dates" />
-      <ScrollView style={{ padding: 16,marginTop:30 }}>
+      <ScrollView style={{ padding: 16, marginTop: 30 }}>
         {Object.entries(grouped).map(([date, tasks]) => (
           <View key={date} style={{ marginBottom: 24 }}>
             <Text style={styles.groupTitle}>
