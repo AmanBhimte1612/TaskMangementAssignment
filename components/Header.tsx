@@ -5,13 +5,16 @@ import {
     TouchableOpacity,
     Dimensions,
     StyleSheet,
+    Image
 } from 'react-native';
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Octicons from '@expo/vector-icons/Octicons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { format } from 'date-fns';
+import { useWeatherIcon } from '@/hooks/WheatherIcon';
 const { width, height } = Dimensions.get('window');
+
 
 type Props = {
     headerTitle: string;
@@ -33,6 +36,7 @@ const Header = ({
     const searchHeight = height * 0.045;
     const circleSize = width * 0.40;
     const todayString = `Today, ${format(new Date(), 'd MMM')}`;
+    const iconUrl = useWeatherIcon();
 
     return (
         <View style={[styles.headerContainer, { height: height * 0.18 }]}>
@@ -91,7 +95,17 @@ const Header = ({
             {/* Bottom Titles */}
             <View style={styles.bottomText}>
                 <Text style={[styles.dateText, { fontSize: width * 0.035 }]}> {`Today, ${format(new Date(), 'd MMM')}`}</Text>
-                <Text style={[styles.titleText, { fontSize: width * 0.05 }]}>{headerTitle}</Text>
+                <View className='flex flex-row relative'>
+                    <Text style={[styles.titleText, { fontSize: width * 0.05 }]}>{headerTitle}</Text>
+                    {iconUrl && (
+                        <Image
+                            source={{ uri: iconUrl }}
+                            // style={{ width: 30, height: 30, marginLeft: 8 }}
+                            className='absolute -bottom-2 -right-24 w-[70px] h-[70px]'
+                            resizeMode="contain"
+                        />
+                    )}
+                </View>
             </View>
         </View>
     );
