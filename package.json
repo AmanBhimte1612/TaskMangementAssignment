@@ -16,6 +16,7 @@
     "@react-native-community/datetimepicker": "8.3.0",
     "@react-native-firebase/firestore": "^22.2.1",
     "@react-navigation/bottom-tabs": "^7.3.17",
+    "@react-navigation/drawer": "^7.5.1",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.13",
     "date-fns": "^4.1.0",

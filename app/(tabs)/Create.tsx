@@ -1,4 +1,10 @@
-import { View, Text, SafeAreaView, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  useWindowDimensions,
+  ScrollView,
+} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import CustomTextInput from '@/components/CustomTextInput';
@@ -10,6 +16,8 @@ import { handleSaveTask } from '@/sevices';
 import { router } from 'expo-router';
 
 const Create = () => {
+  const { width, height } = useWindowDimensions();
+
   const [taskTitle, setTaskTitle] = useState('');
   const [taskDes, setTaskDes] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -22,10 +30,9 @@ const Create = () => {
     dueDate: '',
     time: '',
     priority: '',
-    status:'inCompelete'
+    status: 'inCompelete',
   });
 
-  // Sync form state whenever any field updates
   useEffect(() => {
     setForm({
       taskTitle,
@@ -33,11 +40,8 @@ const Create = () => {
       dueDate,
       time,
       priority,
-      status:'inCompelete'
-      
+      status: 'inCompelete',
     });
-
-
   }, [taskTitle, taskDes, dueDate, time, priority]);
 
   const handleSubmit = async () => {
@@ -45,22 +49,22 @@ const Create = () => {
     if (res === true) {
       alert('Task Created Successfully');
       router.push('/(tabs)/Tasks');
-    }
-    else {
+    } else {
       alert('Task Creation Failed');
     }
-  }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       <Header headerTitle="Create tasks" />
 
-      <View className="flex-1 pt-10 items-center px-4 py-8 gap-2">
+      <View className="flex-1 pt-10 items-center px-4 mt-5 py-8 gap-2">
         <CustomTextInput
           label="Task Title"
           placeholder="Task Title"
           value={taskTitle}
           onChangeText={setTaskTitle}
+          style={{ width: width * 0.85 }}
         />
 
         <CustomTextInput
@@ -68,32 +72,37 @@ const Create = () => {
           placeholder="Task Description (One Sentence)"
           value={taskDes}
           onChangeText={setTaskDes}
+          style={{ width: width * 0.85 }}
         />
 
-        <View className="flex-row justify-between items-center w-[300px] gap-2 mb-6">
+        <View
+          style={{ width: width * 0.85 }}
+          className="flex-row justify-between items-center gap-2 mb-6"
+        >
           <DateTime
-            className="border border-gray-300 w-[150px] bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
+            className="border border-gray-300 bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
             setdate={setDueDate}
             placeHolder="Due Date"
+            style={{ width: width * 0.45 }}
           />
 
           <TimePicker
-            className="border border-gray-300 w-[140px] bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
+            className="border border-gray-300 bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
             setTime={setTime}
             placeHolder="Pick Time"
+            style={{ width: width * 0.4 }}
           />
         </View>
 
-        <PriorityDropdown selected={priority} setSelected={setPriority} />
+        <PriorityDropdown selected={priority} setSelected={setPriority} style={{ width: width * 0.85 }} />
 
-        <View className="w-full h-[500px] mt-20 items-center">
+        <View style={{ width: width, height: height * 0.3 }} className="mt-20 items-center">
           <CustomButton
             title="Create Task"
-            className="w-[230px]"
-            titleStyle="text-2xl"
-            onPress={() => {
-              handleSubmit();
-            }}
+            className="rounded-full"
+            style={{ width: width * 0.6 }}
+            titleStyle="text-xl"
+            onPress={handleSubmit}
           />
         </View>
       </View>

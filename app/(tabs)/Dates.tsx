@@ -97,7 +97,7 @@ const Tasks = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <Header headerTitle="By dates" />
-      <ScrollView style={{ padding: 16,marginTop:10 }}>
+      <ScrollView style={{ padding: 16,marginTop:30 }}>
         {Object.entries(grouped).map(([date, tasks]) => (
           <View key={date} style={{ marginBottom: 24 }}>
             <Text style={styles.groupTitle}>

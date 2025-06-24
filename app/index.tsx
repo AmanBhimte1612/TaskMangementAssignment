@@ -13,5 +13,5 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={user ? '/(tabs)/Tasks' : '/(auth)/Login'} />;
+  return <Redirect href={user ? '/(tabs)/Tasks' : '/(auth)/welcome'} />;
 }

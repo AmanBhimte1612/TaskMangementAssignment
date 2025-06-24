@@ -97,7 +97,7 @@ const SignUp = () => {
           </View>
 
           {/* Bottom Link */}
-          <View className="items-center mb-6">
+          <View className="items-center mb-10">
             <Text className="text-center text-gray-400">
               Already have an account?{' '}
               <TouchableOpacity

@@ -9,6 +9,7 @@ import {
     Platform,
     UIManager,
     LayoutAnimation,
+    Button
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Checkbox from 'expo-checkbox';
@@ -17,6 +18,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { getSubcollectionData } from '@/sevices';
 import { parse, compareAsc, isToday, set, } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
+import SideMenu from '@/components/SideMenu';
+import PopupMenu from '@/components/PopupMenu';
+import { useAuth } from '@/context/AuthContext';
+import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 
 
 type Task = {
@@ -24,7 +29,6 @@ type Task = {
     [key: string]: any;
 };
 
-// Enable layout animation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
@@ -43,12 +47,10 @@ const sortTasks = (tasks: any[]) => {
     });
 };
 
-// 🔹 Helper: Parse just the date (e.g., "22/6/2025")
 function parseDate(dateStr: string) {
     return parse(dateStr, 'd/M/yyyy', new Date());
 }
 
-// 🔹 Helper: Parse just the time (e.g., "10:30 pm")
 function parseTime(timeStr: string) {
     const cleanTime = timeStr.replace(/\u202f/g, '').replace(/\s+/g, '');
     return parse(cleanTime.trim(), 'h:mma', new Date());
@@ -61,7 +63,6 @@ const getTodaysTasks = (tasks: any[]) => {
     });
 };
 
-// Task Item component
 const TaskItem = ({ item, onDelete, onComplete, onExpand, isExpanded }: any) => {
     const translateX = useRef(new Animated.Value(0)).current;
     const isCompleted = item.status === 'completed';
@@ -143,6 +144,8 @@ const TaskItem = ({ item, onDelete, onComplete, onExpand, isExpanded }: any) => 
 const Tasks = () => {
     const [expandedTask, setExpandedTask] = useState<string | null>(null);
     const [taskList, setTaskList] = useState<any[]>([]);
+    const [menuVisible, setMenuVisible] = useState(false);
+    const { logout } = useAuth();
 
     useFocusEffect(
         useCallback(() => {
@@ -178,9 +181,37 @@ const Tasks = () => {
         setTaskList(sortTasks(updated));
     };
 
+    const menuItems = [
+        {
+            label: 'My Profile',
+            icon: <Feather name="user" size={20} color="black" />,
+            onPress: () => console.log('Profile pressed'),
+        },
+        {
+            label: 'Documents',
+            icon: <MaterialIcons name="insert-drive-file" size={20} color="black" />,
+            onPress: () => console.log('Documents pressed'),
+        },
+        {
+            label: 'Log out',
+            icon: <Entypo name="log-out" size={20} color="black" />,
+            onPress: () => {
+                logout();
+            },
+        },
+    ];
+
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-            <Header headerTitle="Today's tasks" />
+            <Header headerTitle="Today's tasks" onLeftPress={() => { setMenuVisible(!menuVisible) }}
+                onRightPress={() => { setMenuVisible(!menuVisible) }} />
+            <PopupMenu
+                visible={menuVisible}
+                onClose={() => setMenuVisible(false)}
+                items={menuItems}
+            />
+            
             <FlatList
                 data={taskList}
                 keyExtractor={(item) => item.id}
@@ -193,7 +224,7 @@ const Tasks = () => {
                         isExpanded={item.id === expandedTask}
                     />
                 )}
-                contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}
+                contentContainerStyle={{ paddingBottom: 20, paddingTop: 10,marginTop:30 }}
             />
         </SafeAreaView>
     );
