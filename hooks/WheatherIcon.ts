@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 
-const API_KEY = '799a52bb1c40de4073e797cba354a82a'; // 🔁 Replace this with your OpenWeatherMap API key
+const API_KEY = ''; // 🔁 Replace this with your OpenWeatherMap API key
 
 export const useWeatherIcon = () => {
   const [iconUrl, setIconUrl] = useState<string | null>(null);
