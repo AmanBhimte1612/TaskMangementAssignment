@@ -9,13 +9,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyDK2yXeVy6W8FBY9_V8GkA49naTaZeRIco",
-  authDomain: "taskmanagementassignment.firebaseapp.com",
-  projectId: "taskmanagementassignment",
-  storageBucket: "taskmanagementassignment.appspot.com", // ✅ fixed `.app` typo
-  messagingSenderId: "904957436256",
-  appId: "1:904957436256:web:da48bf831c7a998ce7fe05",
-  measurementId: "G-RZ9SSBY7T8",
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "", // ✅ fixed `.app` typo
+  messagingSenderId: "",
+  appId: "",
+  measurementId: "",
 };
 
 // Initialize Firebase once
