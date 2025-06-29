@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, Platform, Modal, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, Pressable, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 type Props = {
+    value?: string; // 🔄 Controlled from parent
     setdate: (date: string) => void;
     placeHolder?: string;
-    className?: string
+    className?: string;
 };
 
-const DateTime = ({ setdate, placeHolder ,className}: Props) => {
+const DateTime = ({ value, setdate, placeHolder, className }: Props) => {
     const [show, setShow] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+    // 🔄 Reset selectedDate if parent clears it
+    useEffect(() => {
+        if (!value) {
+            setSelectedDate(null);
+        }
+    }, [value]);
 
     const onChange = (_: any, date?: Date) => {
         setShow(Platform.OS === 'ios');
@@ -21,9 +29,11 @@ const DateTime = ({ setdate, placeHolder ,className}: Props) => {
         }
     };
 
-    const formattedValue = selectedDate
-        ? `${selectedDate.getDate()}/${selectedDate.getMonth() + 1}/${selectedDate.getFullYear()}`
-        : '';
+    const formattedValue = value
+        ? value
+        : selectedDate
+            ? `${selectedDate.getDate()}/${selectedDate.getMonth() + 1}/${selectedDate.getFullYear()}`
+            : '';
 
     return (
         <View>
@@ -35,12 +45,12 @@ const DateTime = ({ setdate, placeHolder ,className}: Props) => {
                     pointerEvents="none"
                     className={className}
                     style={{
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 1 },
-                            shadowOpacity: 0.2,
-                            shadowRadius: 6,
-                            elevation: 1,
-                        }}
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.2,
+                        shadowRadius: 6,
+                        elevation: 1,
+                    }}
                 />
             </Pressable>
 

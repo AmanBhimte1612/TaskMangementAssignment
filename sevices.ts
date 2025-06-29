@@ -1,5 +1,7 @@
 import { db } from '@/FirebaseConfig';
 import { doc, setDoc, collection, addDoc,getDocs, deleteDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/FirebaseConfig';
 
 /**
  * Save a task under: Users => [userDocId] => Tasks => [taskDoc]
@@ -109,5 +111,30 @@ export const updateTaskInFirestore = async (
   } catch (error) {
     console.error('Error updating task:', error);
     throw error;
+  }
+};
+
+
+
+/**
+ * Logs in a user using email and password
+ * @param {string} email 
+ * @param {string} password 
+ * @returns {Promise<{ uid: string; sessionId: string }>}
+ */
+export const loginWithEmail = async (
+  email: string,
+  password: string
+): Promise<{ uid: string; sessionId: string }> => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    const sessionId = await user.getIdToken(); 
+    const uid = user.uid;
+
+    return { uid, sessionId };
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 };

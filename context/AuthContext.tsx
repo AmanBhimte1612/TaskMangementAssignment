@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, User,signOut } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { auth } from '@/FirebaseConfig';
 import { router } from 'expo-router';
 
@@ -23,20 +23,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return unsubscribe;
     }, []);
+
     const logout = async () => {
         try {
             await signOut(auth);
             setUser(null);
-            if (user ===null){
-                router.push('/(auth)/welcome');
-            }
+            router.push('/(auth)/welcome'); 
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
 
+
     return (
-        <AuthContext.Provider value={{ user, loading,logout }}>
+        <AuthContext.Provider value={{ user, loading, logout }}>
             {children}
         </AuthContext.Provider>
     );

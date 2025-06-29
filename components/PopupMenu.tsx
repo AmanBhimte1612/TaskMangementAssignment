@@ -25,6 +25,8 @@ type Props = {
     items: MenuItem[];
 };
 
+// https://taskmanagementassignment.firebaseapp.com/__/auth/handler
+
 const PopupMenu = ({ visible, onClose, items }: Props) => {
     const scale = useSharedValue(0);
     const translateX = useSharedValue(50);

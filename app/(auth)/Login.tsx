@@ -15,22 +15,31 @@ import { images } from '@/constants';
 import CustomTextInput from '@/components/CustomTextInput';
 import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
-import { loginWithEmail } from '@/components/loginWithEmail';
+import { loginWithEmail } from '@/sevices';
+import Loading from '@/components/Loading';
+// import GoogleSignInButton from '@/components/GoogleSiginInButton';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading,setLoading]=useState(false)
 
   const handleLogin = async () => {
+    setLoading(true)
     try {
       const uid = await loginWithEmail(email, password);
-      Alert.alert('Login successful!', `User ID: ${uid}`);
       router.replace('/(tabs)/Tasks');
     } catch (error: any) {
       Alert.alert('Login failed', error.message);
     }
+    finally{
+      setLoading(false)
+    }
   };
-
+  if (loading) {
+    return <Loading load={loading}/>; 
+  }
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -67,14 +76,16 @@ const Login = () => {
               />
             </View>
 
-            <View className="items-center justify-center mt-8">
+            <View className="items-center justify-center mt-8 space-y-4">
               <CustomButton
                 title="Log In"
                 className="w-[180px]"
                 titleStyle="text-2xl"
                 onPress={handleLogin}
               />
+              {/* <GoogleSignInButton /> */}
             </View>
+
           </View>
 
           {/* Bottom Link */}

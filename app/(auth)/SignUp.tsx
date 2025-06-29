@@ -18,14 +18,16 @@ import { router } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/FirebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
+import Loading from '@/components/Loading';
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+    const [loading,setLoading]=useState(false)
+  
   const handleSignUp = async () => {
+    setLoading(true)
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill out all fields');
       return;
     }
 
@@ -35,15 +37,17 @@ const SignUp = () => {
 
       await setDoc(doc(db, 'Users', userId), {
         email,
-        password, // ⚠️ For production, NEVER store raw passwords!
+        password, 
         tasks: [],
       });
 
-      Alert.alert('Success', 'Account created successfully!');
       router.replace('/(auth)/Login');
     } catch (error: any) {
       console.error(error);
       Alert.alert('Sign Up Failed', error.message);
+    }
+    finally{
+      setLoading(false)
     }
   };
 

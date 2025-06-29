@@ -14,13 +14,12 @@ import TimePicker from '@/components/Timepicker';
 import CustomButton from '@/components/CustomButton';
 import { handleSaveTask } from '@/sevices';
 import { router } from 'expo-router';
-import { app } from '@/FirebaseConfig'; // your initialized firebase app
+import { app } from '@/FirebaseConfig';
 import { getAuth } from 'firebase/auth';
 
 const Create = () => {
   const auth = getAuth(app);
-      const userId = auth.currentUser?.uid;
-      console.log('Current User ID:', userId);
+  const userId = auth.currentUser?.uid;
   const { width, height } = useWindowDimensions();
 
   const [taskTitle, setTaskTitle] = useState('');
@@ -28,34 +27,52 @@ const Create = () => {
   const [dueDate, setDueDate] = useState('');
   const [time, setTime] = useState('');
   const [priority, setPriority] = useState('');
+  const [errorFields, setErrorFields] = useState<string[]>([]);
 
-  const [form, setForm] = useState({
-    taskTitle: '',
-    taskDes: '',
-    dueDate: '',
-    time: '',
-    priority: '',
+  const form = {
+    taskTitle,
+    taskDes,
+    dueDate,
+    time,
+    priority,
     status: 'inCompelete',
-  });
+  };
 
-  useEffect(() => {
-    setForm({
-      taskTitle,
-      taskDes,
-      dueDate,
-      time,
-      priority,
-      status: 'inCompelete',
-    });
-  }, [taskTitle, taskDes, dueDate, time, priority]);
+  const validateFields = () => {
+    const missing: string[] = [];
+    if (!taskTitle.trim()) missing.push('Task Title');
+    if (!taskDes.trim()) missing.push('Task Description');
+    if (!dueDate.trim()) missing.push('Due Date');
+    if (!time.trim()) missing.push('Time');
+    if (!priority.trim()) missing.push('Priority');
+    return missing;
+  };
 
   const handleSubmit = async () => {
-    const res = await handleSaveTask(userId, form);
-    if (res === true) {
-      alert('Task Created Successfully');
-      router.push('/(tabs)/Tasks');
-    } else {
-      alert('Task Creation Failed');
+    const missingFields = validateFields();
+    if (missingFields.length > 0) {
+      setErrorFields(missingFields);
+      return;
+    }
+
+    setErrorFields([]);
+    try {
+      const res = await handleSaveTask(userId, form);
+      if (res === true) {
+        alert('Task Created Successfully');
+        router.push('/(tabs)/Tasks');
+      } else {
+        alert('Task Creation Failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while creating the task.');
+    } finally {
+      setTaskDes('');
+      setTaskTitle('');
+      setTime('');
+      setPriority('');
+      setDueDate('');
     }
   };
 
@@ -86,6 +103,7 @@ const Create = () => {
         >
           <DateTime
             className="border border-gray-300 bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
+            value={dueDate}
             setdate={setDueDate}
             placeHolder="Due Date"
             style={{ width: width * 0.45 }}
@@ -93,13 +111,26 @@ const Create = () => {
 
           <TimePicker
             className="border border-gray-300 bg-purple-50 rounded-full pl-4 py-4 text-base pr-12"
+            value={time}
             setTime={setTime}
             placeHolder="Pick Time"
             style={{ width: width * 0.4 }}
           />
         </View>
 
-        <PriorityDropdown selected={priority} setSelected={setPriority} style={{ width: width * 0.85 }} />
+        <PriorityDropdown
+          selected={priority}
+          setSelected={setPriority}
+          style={{ width: width * 0.85 }}
+        />
+
+        {errorFields.length > 0 && (
+          <View style={{ marginTop: 10 }}>
+            <Text style={{ color: 'red', textAlign: 'center', fontSize: 14 }}>
+              Please fill: {errorFields.join(', ')}
+            </Text>
+          </View>
+        )}
 
         <View style={{ width: width, height: height * 0.3 }} className="mt-20 items-center">
           <CustomButton

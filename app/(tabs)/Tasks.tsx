@@ -12,10 +12,8 @@ import {
     Button
 } from 'react-native';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Checkbox from 'expo-checkbox';
 import Header from '@/components/Header';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { getSubcollectionData, deleteTaskFromFirestore } from '@/sevices';
+import { getSubcollectionData, deleteTaskFromFirestore, updateTaskInFirestore } from '@/sevices';
 import { parse, compareAsc, isToday, set, } from 'date-fns';
 import { useFocusEffect } from '@react-navigation/native';
 import SideMenu from '@/components/SideMenu';
@@ -23,9 +21,9 @@ import PopupMenu from '@/components/PopupMenu';
 import { useAuth } from '@/context/AuthContext';
 import { Entypo, Feather, MaterialIcons } from '@expo/vector-icons';
 import { getAuth } from 'firebase/auth';
-import { app } from '@/FirebaseConfig'; // your initialized firebase app
-
-
+import { app } from '@/FirebaseConfig';
+import TaskItem from '@/components/TaskItems';
+import ConfirmationModal from '@/components/ConfirmtionModal';
 
 
 type Task = {
@@ -47,6 +45,7 @@ const sortTasks = (tasks: any[]) => {
 
         const aTime = parseTime(a.time);
         const bTime = parseTime(b.time);
+
         return compareAsc(aTime, bTime); // Then sort by time if date is same
     });
 };
@@ -67,117 +66,56 @@ const getTodaysTasks = (tasks: any[]) => {
     });
 };
 
-const TaskItem = ({ item, onDelete, onComplete, onExpand, isExpanded }: any) => {
-    const translateX = useRef(new Animated.Value(0)).current;
-    const isCompleted = item.status === 'completed';
-
-    const handleDelete = () => {
-        Animated.timing(translateX, {
-            toValue: -500,
-            duration: 300,
-            useNativeDriver: true,
-        }).start(() => onDelete(item.id));
-    };
-
-    return (
-        <Animated.View
-            style={[
-                styles.card,
-                isCompleted && styles.disabledCard,
-                { transform: [{ translateX }] },
-            ]}
-        >
-            <View style={styles.row}>
-                <Checkbox
-                    value={isCompleted}
-                    onValueChange={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        !isCompleted && onComplete(item.id);
-                    }}
-                    disabled={isCompleted}
-                />
-                <TouchableOpacity
-                    style={styles.textContainer}
-                    disabled={isCompleted}
-                    onPress={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        onExpand(item.id);
-                    }}
-                >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <View>
-                            <Text style={styles.title}>{item.taskTitle}</Text>
-                            <Text style={styles.date}>
-                                {item.dueDate} {item.time}
-                            </Text>
-                        </View>
-                        <View
-                            style={[
-                                styles.priorityBadge,
-                                {
-                                    backgroundColor:
-                                        item.priority === 'High'
-                                            ? '#dc2626'
-                                            : item.priority === 'Medium'
-                                                ? '#fb923c'
-                                                : '#22c55e',
-                                },
-                            ]}
-                        >
-                            <Text style={styles.priorityText}>{item.priority}</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            </View>
-
-            {isExpanded && (
-                <View style={styles.descriptionContainer}>
-                    <Text style={styles.description}>{item.taskDes}</Text>
-                    <TouchableOpacity
-                        onPress={handleDelete}
-                        style={styles.deleteButton}
-                    >
-                        <AntDesign name="delete" size={20} color="white" />
-                    </TouchableOpacity>
-                </View>
-            )}
-        </Animated.View>
-    );
-};
 
 const Tasks = () => {
     const auth = getAuth(app);
     const userId = auth.currentUser?.uid;
-    console.log('Current User ID:', userId);
+    // console.log('Current User ID:', userId);
     const [expandedTask, setExpandedTask] = useState<string | null>(null);
     const [taskList, setTaskList] = useState<any[]>([]);
     const [menuVisible, setMenuVisible] = useState(false);
     const { logout } = useAuth();
+    const [refresh, setRefresh] = useState(false)
+    const [showModal, setShowModal] = useState(false);
+    const [modalTitle, setTitle] = useState('')
+    const [modalMessage, setMessage] = useState('')
+    const [onConfirm, setConfirm] = useState<() => void>(() => () => { });
 
+
+
+    const fetchAndSetTasks = async () => {
+        const tasksData = await getSubcollectionData(
+            'Users',
+            userId,
+            'Tasks'
+        );
+        const todaysTasks = getTodaysTasks(tasksData);
+        const sortedTasks = sortTasks(todaysTasks);
+        setTaskList(sortedTasks);
+        // console.log('Tasks:', sortedTasks);
+    };
     useFocusEffect(
         useCallback(() => {
-            const fetchAndSetTasks = async () => {
-                const tasksData = await getSubcollectionData(
-                    'Users',
-                    userId,
-                    'Tasks'
-                );
-                const todaysTasks = getTodaysTasks(tasksData);
-                const sortedTasks = sortTasks(todaysTasks);
-                setTaskList(sortedTasks);
-                console.log('Tasks:', sortedTasks);
-            };
-
             fetchAndSetTasks();
         }, [])
     );
 
     const toggleComplete = (id: string) => {
-        const updated = taskList.map((task) =>
-            task.id === id ? { ...task, status: 'Completed' } : task
-        );
-        
-        setTaskList(sortTasks(updated));
+        setTitle('Task Completed?')
+        setMessage("Are you sure yow want to mark this as Completed, it con't be undone..")
+        setConfirm(() => {
+
+            const updated = taskList.map((task) =>
+                task.id === id ? { ...task, status: 'Completed' } : task
+            );
+            updateTaskInFirestore(userId, id, { status: 'Completed' })
+
+            setTaskList(sortTasks(updated));
+            setShowModal(false);
+
+        })
+        setShowModal(true);
+
     };
 
     const toggleExpand = (id: string) => {
@@ -185,27 +123,45 @@ const Tasks = () => {
     };
 
     const handleDelete = (id: string) => {
-        const updated = taskList.filter((task) => task.id !== id);
-        deleteTaskFromFirestore(userId, id);
-        setTaskList(sortTasks(updated));
+        setTitle('Delete Task')
+        setMessage('Are you sure yow want to delete this task from your list')
+        setConfirm(() => {
+
+            const updated = taskList.filter((task) => task.id !== id);
+            deleteTaskFromFirestore(userId, id);
+            setTaskList(sortTasks(updated));
+            setShowModal(false);
+
+        })
+        setShowModal(true);
+
     };
+
+    const handleLogout = () => {
+        setTitle('Log Out?');
+        setMessage('Are you sure you want to logout from the app?');
+        setConfirm(() => async () => {
+            await logout();
+            setShowModal(false);
+        });
+        setShowModal(true);
+    };
+
 
     const menuItems = [
         {
             label: 'My Profile',
             icon: <Feather name="user" size={20} color="black" />,
-            onPress: () => console.log('Profile pressed'),
         },
         {
             label: 'Documents',
             icon: <MaterialIcons name="insert-drive-file" size={20} color="black" />,
-            onPress: () => console.log('Documents pressed'),
         },
         {
             label: 'Log out',
             icon: <Entypo name="log-out" size={20} color="black" />,
-            onPress: () => {
-                logout();
+            onPress: async () => {
+                handleLogout();
             },
         },
     ];
@@ -224,6 +180,10 @@ const Tasks = () => {
             <FlatList
                 data={taskList}
                 keyExtractor={(item) => item.id}
+                // onEndReached={}
+                // onEndReachedThreshold={}
+                refreshing={refresh}
+                onRefresh={() => { fetchAndSetTasks() }}
                 renderItem={({ item }) => (
                     <TaskItem
                         item={item}
@@ -234,6 +194,13 @@ const Tasks = () => {
                     />
                 )}
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 10, marginTop: 30 }}
+            />
+            <ConfirmationModal
+                visible={showModal}
+                title={modalTitle}
+                message={modalMessage}
+                onCancel={() => setShowModal(false)}
+                onConfirm={onConfirm}
             />
         </SafeAreaView>
     );

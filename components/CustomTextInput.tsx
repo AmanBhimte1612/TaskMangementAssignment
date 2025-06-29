@@ -16,7 +16,8 @@ type Props = {
     label: string;
     keyboardType?: 'default' | 'numeric' | 'email-address' | 'phone-pad';
     secureTextEntry?: boolean;
-    value?:string
+    value?:string;
+    onChangeText: any;
 };
 
 const CustomTextInput = ({
@@ -25,6 +26,8 @@ const CustomTextInput = ({
     keyboardType = 'default',
     secureTextEntry = false,
     value,
+    onChangeText,
+
     ...props
 }: Props) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -53,6 +56,7 @@ const CustomTextInput = ({
                             elevation: 1,
                         }}
                         value={value}
+                        onChangeText={onChangeText}
                         {...props}
                     />
 

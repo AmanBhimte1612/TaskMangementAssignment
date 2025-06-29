@@ -18,10 +18,10 @@ export const loginWithEmail = async (
     const sessionId = await user.getIdToken(); // Firebase ID Token (JWT)
     const uid = user.uid;
 
-    console.log("Logged in as:", user.email);
+    // console.log("Logged in as:", user.email);
     return { uid, sessionId };
   } catch (error: any) {
-    console.error("Login failed:", error.message);
+    // console.error("Login failed:", error.message);
     throw new Error(error.message);
   }
 };
